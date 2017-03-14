@@ -5,7 +5,7 @@ Uses OpenCV to simulate ball games!
 ## Usage
 Download and build [OpenCV 3.0+][1]
 
-`git clone` repo
+`git clone https://github.com/Eric4Jiang/ball_arcade.git`
 
 `python3 ballArcade.py -gameMode -radius -numOfBalls`
 

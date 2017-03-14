@@ -13,7 +13,9 @@ class PingPong(BallGame):
     # @returns processed image with balls drawn
     def run(self, img):
         im_copy = img.copy()
-       
+
+        super().bounceOffBalls(im_copy)
+
         for ball in self.balls:
             super().keepBallInBoundaries(ball, img)
             ball.setCenter((ball.center[0] + ball.velocity[0], 

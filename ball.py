@@ -27,12 +27,28 @@ class Ball:
     def setRadius(self, radius):
         self.radius = radius
 
+    def getMagnitude(self):
+        return math.sqrt(self.velocity[0]**2 + self.velocity[1]**2)
+
     # bounce ball in x direction
     def bounceX(self):
-        print ("SIDE")
         self.velocity[0] *= -1
 
     # bounce ball in y direction
     def bounceY(self):
-        print ("TOP/BOTTOM")
         self.velocity[1] *= -1
+
+    # checks if point (x, y) is within the ball
+    def containsPoint(self, point):
+        x, y = point
+        return (x - self.center[0])**2 + (y - self.center[1])**2 < self.radius**2
+
+    # checks for collision with another ball
+    # The distance between their centers must be between
+    #   * the sum of their radii
+    #   * the difference of their radii
+    def collideWithBall(self, ball2):
+        distanceSq = (self.center[0] - ball2.center[0])**2 \
+                      + (self.center[1] - ball2.center[1])**2
+        return distanceSq >= (self.radius - ball2.radius)**2 \
+                and distanceSq <= (self.radius + ball2.radius)**2
