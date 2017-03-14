@@ -1,0 +1,12 @@
+__init__.py
+
+__pyache__/
+
+*.pyc
+
+# vim stuff
+*.swp
+*.swo
+
+#OSX
+.DS_Store
