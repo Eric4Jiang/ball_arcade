@@ -24,6 +24,7 @@ if __name__ == "__main__":
     if gameMode == "PingPong":
         game = PingPong(test)
         game.initBalls(numOfBalls, radius)
+        print ("PingPong")
 
     while True:
         ret, frame = cap.read()
@@ -31,6 +32,10 @@ if __name__ == "__main__":
         
         cv2.imshow(gameMode, out)
         cv2.waitKey(1)
+        
+        # pause
+        if cv2.waitKey(50) & 0xFF == ord('p'):
+            cv2.waitKey(0)
 
 cap.release()
 cv2.destroyAllWindows()
