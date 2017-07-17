@@ -67,12 +67,22 @@ class BallGame:
                 ball2.setVelocity([vX2, vY2])
 
     # Bounce all balls off any contours they collide with
-    def bounceBallsOffContours(self, cnt):
-        cnt = cnt.reshape(-1, 2).astype(np.int32)
-        for ball in self.balls:
-            pos = ball.collideWithContour(cnt)
-            if pos is not None:
-            # if ball.collideWithContour(cnt):
-                print ("hit")
-                ball.bounceOffContour(cnt, pos)
-                
+    # contours = list of contours(list of points)
+    def bounceBallsOffContours(self, cnts):
+        if len(cnts) is 0:
+            return
+
+        cnts = np.array(cnts)
+        resized_cnts = [] # convert cnt Array of Array of point to Array of points
+        for c in cnts:
+            resized_cnts.append(c.reshape(-1, 2).astype(np.int32))
+
+        # check all contours for contact with ball
+        for c in resized_cnts:
+            for ball in self.balls:
+                pos = ball.collideWithContour(c)
+                if pos is not None:
+                    # p1 = c[pos]
+                    # p2 = c[pos+1]
+                    # ball.bounceOffContour(p1, p2)
+                    ball.bounceOffContour(c, pos)

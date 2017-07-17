@@ -7,23 +7,24 @@ from ballGame import BallGame
 class PingPong(BallGame):
     def __init__(self, img):
         super().__init__(img)
+        self.LEN_THRESH = 1000
+        self.AREA_THRESH = 10000
     
     # finds blue objects
-    def proc_img(self, img):
+    # returns a list of contours(list of points)
+    def find_cnts(self, img):
         im_copy = img.copy()
 
         hsv = cv2.cvtColor(im_copy, cv2.COLOR_BGR2HSV)
-        thresh = cv2.inRange(hsv, np.array([110,50,50]), np.array([130,255,255]))
+        thresh = cv2.inRange(hsv, np.array([110,50,50]), np.array([130,255,255])) # blue
         eroded = cv2.erode(thresh, (3,3), iterations=3)
         dilated = cv2.dilate(eroded, (3,3), iterations=3)
         _, contours, _ = cv2.findContours(dilated, mode=cv2.RETR_LIST, method=cv2.CHAIN_APPROX_SIMPLE)
       
         # filter contours
         goodContours = []
-        LEN_THRESH = 1000
-        AREA_THRESH = 10000
         for c in contours:
-            if len(c) > LEN_THRESH and cv2.contourArea(c) > AREA_THRESH:
+            if len(c) > self.LEN_THRESH and cv2.contourArea(c) > self.AREA_THRESH:
                 goodContours.append(c)
 
         return goodContours
@@ -43,13 +44,32 @@ class PingPong(BallGame):
 
        # cv2.drawContours(im_copy, cnt, -1, (0,255,0), thickness=3)
        # cv2.putText(im_copy, str((self.width//4)), (self.width//8, self.height//8), cv2.FONT_HERSHEY_PLAIN, 8, color=(0,0,0), thickness=3)
-        cnts = self.proc_img(img)
-        cv2.drawContours(im_copy, cnts, -1, (0,255,0), thickness=3)
+        cnts = self.find_cnts(img)
+        #cnts_approx = [] # for each cnt estimate a polygon to fit it
+        #hulls = []
+        #for cnt in cnts:
+        #    epsilon = 0.02*cv2.arcLength(cnt,True)
+        #    approx = cv2.approxPolyDP(cnt,epsilon,True)
+        #    cnts_approx.append(approx)
+        #
+        #    hull = cv2.convexHull(cnt)
+        #    hulls.append(hull)
+        cv2.drawContours(im_copy, cnts, -1, (0,255,0), thickness=3);
+
+       # if len(cnts_approx) != 0:
+       #     a = tuple(cnts_approx[0][0][0])
+       #     b = tuple(cnts_approx[0][1][0])
+       #     cv2.circle(im_copy, a, 25, (0,0,0), thickness=-1)
+       #     cv2.circle(im_copy, b, 25, (255,0,255), thickness=-1)
+        #cv2.drawContours(im_copy, cnts, -1, (0,255,0), thickness=3)
+
+        # hull = list of points
+        # box = list of points
+        # drawContours(img, list of list of points, color, thickness)
 
         super().bounceBallsOffBalls()
-        #super().bounceBallsOffContours(cnts)
+        super().bounceBallsOffContours(cnts)
         super().keepBallsInBoundaries()
-    
         for ball in self.balls:
             # Move balls
             ball.setCenter((ball.center[0] + ball.screenVelocity[0], 

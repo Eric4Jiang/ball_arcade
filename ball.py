@@ -33,43 +33,63 @@ class Ball:
     def bounceY(self):
         self.setVelocity([self.velocity[0], -self.velocity[1]])
 
-    def distanceSqToPoint(self, point):
+    def distToPoint(self, point):
         x, y = point
-        return (self.center[0] - x)**2 + (self.center[1] - y)**2
+        return math.sqrt((self.center[0] - x)**2 + (self.center[1] - y)**2)
+        # return (self.center[0] - x)**2 + (self.center[1] - y)**2
 
     # *point = (1, 2) dimension array
     # checks if point (x, y) is within the ball
     def containsPoint(self, point):
-        x, y = point
-        return (x - self.center[0])**2 + (y - self.center[1])**2 < self.radius**2
+        return self.distToPoint(point) < self.radius
 
     # checks for collision with another ball
     # The distance between their centers must be between
     #   * the sum of their radii
     #   * the difference of their radii
     def collideWithBall(self, ball2):
-        distanceSq = (self.center[0] - ball2.center[0])**2 \
-                      + (self.center[1] - ball2.center[1])**2
-        return distanceSq >= (self.radius - ball2.radius)**2 \
-                and distanceSq <= (self.radius + ball2.radius)**2
+        dist = self.distToPoint(ball2.center)
+        return dist >= (self.radius - ball2.radius) \
+                and dist <= (self.radius + ball2.radius)
 
     # checks for collosion with another object
-    # *obj = list of points (x ,y) of the object
-    # @returns i, index of the point of collision
+    # *obj = list of points (x ,y) of the objec
+    # @returns - pos of point in contour that ball hit 
     def collideWithContour(self, cnt):
-        if len(cnt) < 100:
-            print ("contour too small")
+        self.POINTS_THRESH = 4
+
+        if len(cnt) < self.POINTS_THRESH:
+            print ("cnt too small")
             return None
+
         # make sure ball is within max range of contour
         if not len(cnt) > self.center[0] - cnt[0][0] - self.radius \
                 and len(cnt) > self.center[1] - cnt[0][1] - self.radius: 
+            print ("cnt too far")
             return None
 
+        # check if ball lies on any of the contours edges(which are striaght lines)
+        # https://stackoverflow.com/questions/17692922/check-is-a-point-x-y-is-between-two-points-drawn-on-a-straight-line
+       # for i in range(len(cnt) - 1):
+       #     a = cnt[i]
+       #     b = cnt[i+1]
+       #     # distance of ca + cb = ab
+       #     dist_ab = math.sqrt((b[0] - a[0])**2 + (b[1] - a[1])**2)
+       #     dist_to_a = self.distToPoint(a)
+       #     dist_to_b = self.distToPoint(b)
+       #     diff = dist_ab - (dist_to_a + dist_to_b)
+       #     DIST_THRESH = math.sqrt(self.radius/2 + math.sqrt((self.radius/2)**2 + dist_ab**2))
+       #     print ("Threshold = {}".format(DIST_THRESH))
+       #     print("ab = {}, ac = {}, bc = {} -> {}".format(dist_ab, dist_to_a, dist_to_b, abs(diff)))
+       #     if abs(diff) < DIST_THRESH:
+       #         print ("hit contour {}, {}".format(i, i + 1))
+       #         return i
         i = 0
         for point in cnt:
-             if self.containsPoint(point): # return True
+             if self.containsPoint(point):
+                print ("hit")
                 return i
-            #i += 1
+             i += 1
         return None
 
     # Bounces ball off object
@@ -78,10 +98,10 @@ class Ball:
     #   *N = unit velocity vector of surface to bounce off (Normal force)
     # 
     # Argmuents:
-    #   *obj = thing ball is bouncing off
-    #   *pos = point that hit ball
+    #   *p1, p2 = forms an edge that the ball will bounce off
     def bounceOffContour(self, cnt, pos):
-        # find slope at pos using neighbors
+        # find slope of line formed by p1, p2 
+        #m, b = np.polyfit(p1, p2, 1)
         m, b = np.polyfit([cnt[pos-1][0], cnt[pos][0], cnt[pos+1][0]],
                             [cnt[pos-1][1], cnt[pos][1], cnt[pos+1][1]],
                             1)
@@ -95,6 +115,10 @@ class Ball:
         nY = -1 * math.cos(angle)
         
         # determine which side contour we're bouncing off of
+        # mid_point = ((p1[0] + p2[0])/2, (p1[1]+ p2[1])/2)
+        #ball_to_left_and_slope_pos = self.center[0] < mid_point[0] and m > 0
+        #ball_to_right_and_slope_neg = self.center[0] > mid_point[0] and m < 0
+        
         ball_to_left_and_slope_pos = self.center[0] < cnt[pos][0] and m > 0
         ball_to_right_and_slope_neg = self.center[0] > cnt[pos][0] and m < 0
         if ball_to_left_and_slope_pos or ball_to_right_and_slope_neg:
@@ -124,4 +148,3 @@ class Ball:
         self.setRadius(radius)
         self.setCenter(center)
         self.setColor(color)
-
