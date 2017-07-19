@@ -81,8 +81,6 @@ class BallGame:
         for c in resized_cnts:
             for ball in self.balls:
                 pos = ball.collideWithContour(c)
+                #return pos
                 if pos is not None:
-                    # p1 = c[pos]
-                    # p2 = c[pos+1]
-                    # ball.bounceOffContour(p1, p2)
                     ball.bounceOffContour(c, pos)
