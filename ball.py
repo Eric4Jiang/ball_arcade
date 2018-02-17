@@ -4,17 +4,16 @@ import math
 
 class Ball:
     # minimum speed = 10, max speed = 25
-    # velocity = true velocity of ball (float)
-    # screenVelocity = int velocity to display
+    # velocity = true velocity of ball (float) -> [x, y]
+    # screenVelocity = round velocity to make ball move smoothly on screen
     def setVelocity(self, velocity):
         self.velocity = np.array(velocity)
         self.updateHypotenuse()
-        
         self.screenVelocity = np.array([math.ceil(velocity[0]),
                                         math.ceil(velocity[1])])
 
     def updateHypotenuse(self):
-        self.hypotenuse = math.sqrt(self.velocity[0]**2 + self.velocity[1]**2)
+        self.hypotenuse = np.linalg.norm(self.velocity)
 
     def setCenter(self, center):
         self.center = center
@@ -129,8 +128,8 @@ class Ball:
         # find slope of line formed by p1, p2 
         #m, b = np.polyfit(p1, p2, 1)
         m, b = np.polyfit([cnt[pos-1][0], cnt[pos][0], cnt[pos+1][0]],
-                            [cnt[pos-1][1], cnt[pos][1], cnt[pos+1][1]],
-                            1)
+                          [cnt[pos-1][1], cnt[pos][1], cnt[pos+1][1]],
+                          1)
         # find N
         angle = math.atan(m)
         print ("angle = ", angle)

@@ -1,4 +1,4 @@
-import cv2 
+import cv2
 import numpy as np
 import math
 import itertools
@@ -7,13 +7,24 @@ from random import randint, choice
 from ball import Ball
 
 class BallGame:
-    def __init__(self, img):
+    def __init__(self, h, w):
         self.balls = []
-        self.height, self.width, _ = img.shape
+
+        # used to keep balls inside window
+        self.height = h # y
+        self.width = w # x
+
+        # thresholding values
+        self.LEN_THRESH = 100
+        self.AREA_THRESH = 1000
+
+        self.lower = np.array([65, 150, 150]) # blue
+        self.upper = np.array([138, 255, 255])
 
     # initalizes balls with random velocities
-    def initBalls(self, numOfBalls, radius):    
+    def initBalls(self, numOfBalls, radius):
         for i in range(numOfBalls):
+            # start green ball with specified radius, random location on the screen
             ball = Ball(radius,
                     [randint(radius, self.width-radius), randint(radius, self.height-radius)],
                     color=(0,255,0))
@@ -25,6 +36,7 @@ class BallGame:
 
     # reverse ball direction if it's out image boundaries
     def keepBallsInBoundaries(self):
+        # print (self.height, self.width)
         for ball in self.balls:
             # bounce off top or bottom
             if ball.center[1] + ball.radius + ball.velocity[1] > self.height \
@@ -66,6 +78,34 @@ class BallGame:
                 ball.setVelocity([vX1, vY1])
                 ball2.setVelocity([vX2, vY2])
 
+    # finds blue objects
+    # returns a list of contours(list of points)
+    # if no contours, returns empty list
+    def find_cnts(self, img):
+        im_copy = img.copy()
+
+        hsv = cv2.cvtColor(im_copy, cv2.COLOR_BGR2HSV)
+        thresh = cv2.inRange(hsv, self.lower, self.upper) # blue
+        # cv2.imshow("thresh", thresh)
+        # cv2.waitKey(10)
+        eroded = cv2.erode(thresh, (3,3), iterations=3)
+        dilated = cv2.dilate(eroded, (3,3), iterations=3)
+        m = cv2.moments(dilated)
+
+#        cv2.imshow("dilated", dilated)
+#        cv2.waitKey(10)
+        _, contours, _ = cv2.findContours(dilated, mode=cv2.RETR_LIST, method=cv2.CHAIN_APPROX_SIMPLE)
+
+        # filter contours
+        goodContours = []
+        for c in contours:
+            # print ("len = ", len(c))
+            # print ("area = ", cv2.contourArea(c))
+            if len(c) > self.LEN_THRESH and cv2.contourArea(c) > self.AREA_THRESH:
+                goodContours.append(c)
+
+        return goodContours
+
     # Bounce all balls off any contours they collide with
     # contours = list of contours(list of points)
     def bounceBallsOffContours(self, cnts):
@@ -73,7 +113,8 @@ class BallGame:
             return
 
         cnts = np.array(cnts)
-        resized_cnts = [] # convert cnt Array of Array of point to Array of points
+        resized_cnts = [] # reshape all cnts (Array of Array [1, 2] points)
+                          # to Array of [N, 2], where N is the number of points in that cnt
         for c in cnts:
             resized_cnts.append(c.reshape(-1, 2).astype(np.int32))
 
