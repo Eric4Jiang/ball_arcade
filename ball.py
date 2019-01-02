@@ -52,22 +52,22 @@ class Ball:
                 and dist <= (self.radius + ball2.radius)
 
     # checks for collosion with another object
-    # *obj = list of points (x ,y) of the object 
-    # @returns - pos of point in contour that ball hit 
+    # *obj = list of points (x ,y) of the object
+    # @returns - pos of point in contour that ball hit
     def collideWithContour(self, cnt):
-        self.CNT_LEN_THRESH = 4
         cnt_len = len(cnt)
         if cnt_len < self.CNT_LEN_THRESH:
-            print ("cnt too small")
+            # print ("cnt too small")
             return None
 
         distX_ball_to_cnt = self.center[0] - cnt[0][0] - self.radius
         distY_ball_to_cnt = self.center[1] - cnt[0][1] - self.radius
 
         # make sure ball is within max range of contour
-        if not (len(cnt) > distX_ball_to_cnt and len(cnt) > distY_ball_to_cnt): 
-            print ("cnt too far")
+        if not (len(cnt) > distX_ball_to_cnt and len(cnt) > distY_ball_to_cnt):
+            # print ("cnt too far")
             return None
+
 #        h = np.linalg.norm(cnt[1] - cnt[0])
 #        w = np.linalg.norm(cnt[2] - cnt[1])
 #        hyp = math.hypot(h, w)
@@ -75,7 +75,7 @@ class Ball:
 #        if not (hyp > distX_ball_to_cnt and hyp > distY_ball_to_cnt):
 #            print ("cnt too far")
 #            return None
-#        
+#
 #        # check if ball lies on any of the contours edges(which are striaght lines)
 #        # https://stackoverflow.com/questions/17692922/check-is-a-point-x-y-is-between-two-points-drawn-on-a-straight-line
 #        for i in range(cnt_len):
@@ -105,7 +105,7 @@ class Ball:
         i = 0
         for point in cnt:
              if self.containsPoint(point):
-                print ("hit")
+                # print ("hit")
                 return i
              i += 1
         return None
@@ -114,7 +114,7 @@ class Ball:
     # Vnew = -(2 * (V dot N)*N - V) -> http://www.3dkingdoms.com/weekly/weekly.php?a=2
     #   *V = velocity vector of ball
     #   *N = unit velocity vector of surface to bounce off (Normal force)
-    # 
+    #
     # Argmuents:
     #   *p1, p2 = forms an edge that the ball will bounce off
     def bounceOffContour(self, cnt, pos):
@@ -124,33 +124,34 @@ class Ball:
         #    p2 = cnt[pos+1]
         #else:
         #    p2 = cnt[0]
-        
-        # find slope of line formed by p1, p2 
+
+        # find slope of line formed by p1, p2
         #m, b = np.polyfit(p1, p2, 1)
-        m, b = np.polyfit([cnt[pos-1][0], cnt[pos][0], cnt[pos+1][0]],
-                          [cnt[pos-1][1], cnt[pos][1], cnt[pos+1][1]],
-                          1)
+        pos = max(1, pos)
+        next_pos = pos + 1 if (pos + 1) < len(cnt) else pos
+        m, b = np.polyfit([cnt[pos-1][0], cnt[pos][0], cnt[next_pos][0]],
+                              [cnt[pos-1][1], cnt[pos][1], cnt[next_pos][1]],
+                              1)
         # find N
         angle = math.atan(m)
-        print ("angle = ", angle)
         # take negative reciprocal (sin(x)/cos(x) -> -cos(x)/sin(x)) for perpendicular sloepe
         nX = math.sin(angle)
         nY = -1 * math.cos(angle)
-        
+
         # determine which side contour we're bouncing off of
         #mid_point = ((p1[0] + p2[0])/2, (p1[1]+ p2[1])/2)
         #ball_to_left_and_slope_pos = self.center[0] < mid_point[0] and m > 0
         #ball_to_right_and_slope_neg = self.center[0] > mid_point[0] and m < 0
-    
+
         ball_to_left_and_slope_pos = self.center[0] < cnt[pos][0] and m > 0
         ball_to_right_and_slope_neg = self.center[0] > cnt[pos][0] and m < 0
         #ball_below_cnt = self.center[1] < m * self.center[0] + (p1[1] - m * p1[0])
-        
+
         if ball_to_left_and_slope_pos or ball_to_right_and_slope_neg:
         #if ball_below_cnt:
             nX *= -1
             nY *= -1
-        
+
         N = np.array([nX, nY])
 
         # plug into formula for output vector
@@ -158,12 +159,13 @@ class Ball:
         VN = np.dot(self.velocity, N)
         VNN = 2*VN*N
         VNNV = VNN - self.velocity
-       
-        print ("Velocity = {} N = {}".format(self.velocity, N))
-        print ("(V . N) = ", VN)
-        print ("2 * VN * N = ", VNN)
-        print ("2VNN - velocity = ", VNNV)
-        print ("New velocity = ", R)
+
+        # print ("angle = ", angle)
+        # print ("Velocity = {} N = {}".format(self.velocity, N))
+        # print ("(V . N) = ", VN)
+        # print ("2 * VN * N = ", VNN)
+        # print ("2VNN - velocity = ", VNNV)
+        # print ("New velocity = ", R)
         self.setVelocity(R)
 
     # Fields:
@@ -174,3 +176,4 @@ class Ball:
         self.setRadius(radius)
         self.setCenter(center)
         self.setColor(color)
+        self.CNT_LEN_THRESH = 4

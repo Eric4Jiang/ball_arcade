@@ -35,7 +35,7 @@ class PingPong(BallGame):
         #cnts_approx = [] # for each cnt estimate a polygon to fit it
         #hulls = []
         #boxes = []
-        #for cnt in cnts:
+        # for cnt in cnts:
         #    epsilon = 0.02*cv2.arcLength(cnt,True)
         #    approx = cv2.approxPolyDP(cnt,epsilon,True) #    cnts_approx.append(approx)
         #

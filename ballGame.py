@@ -56,11 +56,12 @@ class BallGame:
                 deltaX = (ball.center[0] - ball2.center[0])
                 if deltaX == 0: # avoid divide by 0
                     deltaX = 1
-                slope = deltaY / deltaX
+                slope = deltaY / deltaX # think with similar triangles
                 mag = (ball.hypotenuse + ball2.hypotenuse) / 2
                 # scale factor
                 scalar = mag / math.sqrt(1**2 + (slope)**2)
 
+                # ball speeds are conserved -> conservation of momentum
                 vX1, vY1 = 1 * scalar, slope * scalar
                 vX2, vY2 = 1 * scalar, slope * scalar
 
@@ -86,8 +87,6 @@ class BallGame:
 
         hsv = cv2.cvtColor(im_copy, cv2.COLOR_BGR2HSV)
         thresh = cv2.inRange(hsv, self.lower, self.upper) # blue
-        # cv2.imshow("thresh", thresh)
-        # cv2.waitKey(10)
         eroded = cv2.erode(thresh, (3,3), iterations=3)
         dilated = cv2.dilate(eroded, (3,3), iterations=3)
         m = cv2.moments(dilated)
