@@ -21,8 +21,8 @@ if __name__ == "__main__":
 
     cap = cv2.VideoCapture(0)
 
-    #print("set width = ", cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640))
-    #print("set height = ", cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480))
+    print("set width = ", cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640))
+    print("set height = ", cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480))
 
     _, frame = cap.read()
 
